@@ -1,0 +1,18 @@
+# Use the latest stable Go version
+FROM golang:1.24
+
+# Set the working directory inside the container
+WORKDIR /app
+
+# Copy only go.mod and go.sum first (to use Docker caching)
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Copy the entire project
+COPY . .
+
+# Build the project
+RUN go build -o bot main.go
+
+# Run the Telegram bot
+CMD ["./bot"]
