@@ -1,0 +1,12 @@
+# Ignore compiled executables
+bot
+
+# Ignore Docker volumes
+pg_data/
+
+# Ignore Golang cache
+bin/
+pkg/
+
+# Ignore environment variables (security)
+.env

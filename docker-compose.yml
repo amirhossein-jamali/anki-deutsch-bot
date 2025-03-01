@@ -1,14 +1,12 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:16
     container_name: postgres_db
     restart: always
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: anki_deutsch
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5432:5432"
     volumes:
@@ -29,9 +27,9 @@ services:
       - postgres
       - redis
     environment:
-      TELEGRAM_BOT_TOKEN: "7153540867:AAEK6o8ZLYDjY4yBM7LQtc3AnfR2pIYymuM"
-      DATABASE_URL: "postgres://admin:password@postgres_db:5432/anki_deutsch?sslmode=disable"
-      REDIS_URL: "redis://redis_cache:6379"
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      DATABASE_URL: ${DATABASE_URL}
+      REDIS_URL: ${REDIS_URL}
     volumes:
       - .:/app
 

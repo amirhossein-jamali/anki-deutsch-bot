@@ -2,19 +2,26 @@ package main
 
 import (
 	"log"
+	"os"
 	"time"
 
 	"gopkg.in/telebot.v3"
 )
 
 func main() {
+	// Load the bot token from environment variables
+	token := os.Getenv("TELEGRAM_BOT_TOKEN")
+	if token == "" {
+		log.Fatal("❌ TELEGRAM_BOT_TOKEN is not set!")
+	}
+
 	// Initialize the bot
 	bot, err := telebot.NewBot(telebot.Settings{
-		Token:  "7153540867:AAEK6o8ZLYDjY4yBM7LQtc3AnfR2pIYymuM",
+		Token:  token,
 		Poller: &telebot.LongPoller{Timeout: 10 * time.Second},
 	})
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("❌ Failed to start bot:", err)
 	}
 
 	// Handle the /start command
