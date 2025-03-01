@@ -5,39 +5,57 @@ import (
 	"os"
 	"time"
 
-	"github.com/joho/godotenv" // Load .env file
+	"github.com/joho/godotenv"
 	"gopkg.in/telebot.v3"
 )
 
 func main() {
-	// Load .env file ONLY if running locally
-	if _, exists := os.LookupEnv("GITHUB_ACTIONS"); !exists {
-		err := godotenv.Load()
-		if err != nil {
-			log.Println("⚠️ Warning: No .env file found, using system environment variables")
-		}
+	// Load .env file
+	err := godotenv.Load()
+	if err != nil {
+		log.Println("⚠️ Warning: No .env file found, using system environment variables")
 	}
 
-	// Load environment variables
+	// Load bot token
 	token := os.Getenv("TELEGRAM_BOT_TOKEN")
 	if token == "" {
 		log.Fatal("❌ TELEGRAM_BOT_TOKEN is not set!")
 	}
 
-	// Initialize the bot
-	bot, err := telebot.NewBot(telebot.Settings{
+	// Bot settings
+	pref := telebot.Settings{
 		Token:  token,
-		Poller: &telebot.LongPoller{Timeout: 10 * time.Second},
-	})
+		Poller: &telebot.LongPoller{Timeout: 10 * time.Second}, // Keep connection alive
+		OnError: func(err error, c telebot.Context) {
+			log.Printf("⚠️ Error: %v\n", err)
+		},
+	}
+
+	// Create bot instance
+	bot, err := telebot.NewBot(pref)
 	if err != nil {
 		log.Fatal("❌ Failed to start bot:", err)
 	}
 
-	// Handle the /start command
+	// Handle /start command
 	bot.Handle("/start", func(c telebot.Context) error {
 		return c.Send("Hello! Your bot is working and environment variables are loaded! 🚀")
 	})
 
-	// Start the bot
+	// Background Goroutine for auto-reconnect
+	go func() {
+		for {
+			if bot.Me.Username == "" {
+				log.Println("🔄 Reconnecting to Telegram...")
+				bot, err = telebot.NewBot(pref)
+				if err == nil {
+					log.Println("✅ Reconnected successfully!")
+				}
+			}
+			time.Sleep(30 * time.Second) // Check every 30 seconds
+		}
+	}()
+
+	// Start bot
 	bot.Start()
 }
